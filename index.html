@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sereno - Meditation App</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,19 +12,22 @@
         }
 
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #ffffff;
+            color: white;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
-            max-width: 414px;
+            max-width: 390px;
             margin: 0 auto;
             min-height: 100vh;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             position: relative;
         }
 
@@ -35,9 +35,7 @@
             display: none;
             min-height: 100vh;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
+            padding: 60px 24px 34px 24px;
             position: relative;
         }
 
@@ -45,247 +43,245 @@
             display: flex;
         }
 
-        .logo {
-            font-family: 'EB Garamond', 'Times New Roman', Georgia, serif;
-            font-size: 42px;
-            font-weight: 400;
-            font-style: italic;
-            letter-spacing: 4px;
-            margin-bottom: 60px;
-            text-align: center;
-            text-shadow: 0 2px 20px rgba(255, 255, 255, 0.3);
-            background: linear-gradient(45deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 50%, #ffffff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-        }
-
-        .mode-selection {
-            width: 100%;
-            max-width: 350px;
-        }
-
-        .mode-title {
-            font-size: 24px;
-            font-weight: 300;
-            text-align: center;
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 40px;
-            opacity: 0.95;
+            height: 44px;
+        }
+
+        .back-btn, .sound-toggle {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 22px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover, .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .back-btn:active, .sound-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .sound-toggle.muted {
+            opacity: 0.6;
+        }
+
+        /* Logo */
+        .logo {
+            font-size: 34px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            font-size: 17px;
+            font-weight: 400;
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 60px;
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         .mode-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 20px;
             cursor: pointer;
-            transition: all 0.4s ease;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
         }
 
         .mode-card:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.18);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
-        .mode-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.6s ease;
+        .mode-card:active {
+            transform: scale(0.98);
         }
 
-        .mode-card:hover::before {
-            left: 100%;
+        .mode-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         .mode-emoji {
-            font-size: 32px;
-            margin-bottom: 15px;
-            display: block;
+            font-size: 28px;
+            margin-right: 16px;
         }
 
         .mode-name {
             font-size: 20px;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
         }
 
         .mode-desc {
-            font-size: 14px;
-            opacity: 0.85;
+            font-size: 15px;
+            opacity: 0.9;
             line-height: 1.4;
-            font-weight: 300;
+            margin-bottom: 8px;
+            font-weight: 400;
         }
 
         .mode-duration {
-            font-size: 12px;
+            font-size: 13px;
             opacity: 0.7;
-            margin-top: 8px;
-            font-weight: 300;
+            font-weight: 500;
         }
 
-        .breathing-pattern {
-            font-size: 11px;
-            opacity: 0.6;
-            margin-top: 4px;
-            font-style: italic;
-        }
-
-        .meditation-screen {
+        /* Session Screen */
+        .session-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            padding: 20px;
-        }
-
-        .session-header {
-            margin-bottom: 30px;
         }
 
         .session-title {
             font-size: 28px;
-            font-weight: 300;
-            margin-bottom: 10px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .session-subtitle {
-            font-size: 16px;
+            font-size: 17px;
             opacity: 0.8;
-            font-weight: 300;
+            margin-bottom: 50px;
+            font-weight: 400;
         }
 
         .breathing-circle {
-            width: 220px;
-            height: 220px;
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            width: 200px;
+            height: 200px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            margin: 30px auto;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 20px 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            transition: all 0.3s ease;
         }
 
         .inner-circle {
-            width: 180px;
-            height: 180px;
+            width: 160px;
+            height: 160px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .breathe-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            opacity: 0.9;
+            font-size: 36px;
+            margin-bottom: 8px;
         }
 
         .breathe-text {
-            font-size: 18px;
-            font-weight: 300;
+            font-size: 17px;
+            font-weight: 500;
             opacity: 0.9;
         }
 
         .timer-display {
-            font-size: 32px;
-            font-weight: 200;
-            margin: 20px 0;
-            opacity: 0.95;
+            font-size: 48px;
+            font-weight: 300;
+            margin: 30px 0;
+            font-feature-settings: 'tnum';
+            letter-spacing: -1px;
         }
 
-        .breathing-timer {
+        .breathing-info {
             width: 100%;
-            max-width: 300px;
-            margin: 20px auto;
-            text-align: center;
+            max-width: 280px;
+            margin: 20px 0;
         }
 
         .breathing-phase {
-            font-size: 16px;
-            font-weight: 400;
-            margin-bottom: 10px;
-            opacity: 0.9;
-            min-height: 24px;
-            text-align: center;
+            font-size: 17px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            min-height: 20px;
         }
 
         .breathing-bar-container {
-            position: relative;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
             overflow: hidden;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .breathing-bar {
             height: 100%;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.9));
+            background: white;
             width: 0%;
-            border-radius: 4px;
+            border-radius: 2px;
             transition: none;
-            position: relative;
-        }
-
-        .breathing-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 4px;
-            height: 100%;
-            background: rgba(255, 255, 255, 1);
-            border-radius: 0 4px 4px 0;
         }
 
         .breathing-count {
-            font-size: 14px;
+            font-size: 15px;
             opacity: 0.7;
-            font-weight: 300;
-            text-align: center;
+            font-weight: 500;
         }
 
         .instructor-message {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 25px 0;
-            font-size: 16px;
-            line-height: 1.5;
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 30px 0;
+            font-size: 15px;
+            line-height: 1.4;
             font-weight: 400;
-            min-height: 80px;
+            min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
             opacity: 0;
             transform: translateY(10px);
             transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .instructor-message.show {
@@ -295,151 +291,72 @@
 
         .controls {
             display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 30px;
+            gap: 12px;
+            margin-top: auto;
+            padding-top: 30px;
         }
 
         .control-btn {
+            flex: 1;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            padding: 15px 25px;
+            padding: 16px 24px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 400;
-            transition: all 0.3s ease;
+            font-size: 17px;
+            font-weight: 600;
+            transition: all 0.2s ease;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .control-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+        }
+
+        .control-btn:active {
+            transform: scale(0.98);
         }
 
         .control-btn.primary {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border-color: rgba(255, 255, 255, 0.9);
         }
 
-        .back-btn {
-            position: absolute;
-            top: 40px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+        .control-btn.primary:hover {
+            background: white;
         }
 
-        .sound-toggle {
-            position: absolute;
-            top: 40px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: white;
-            padding: 12px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+        /* Breathing animations */
+        .breathing-in {
+            transform: scale(1.15);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
         }
 
-        .sound-toggle:hover {
-            background: rgba(255, 255, 255, 0.25);
+        .breathing-out {
+            transform: scale(1);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .sound-toggle.muted {
-            opacity: 0.5;
+        .breathing-hold {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
-        .breathe-slow {
-            animation: breatheAnimation 10s ease-in-out infinite;
-        }
-
-        .breathe-medium {
-            animation: breatheAnimation 8s ease-in-out infinite;
-        }
-
-        .breathe-fast {
-            animation: breatheAnimation 6s ease-in-out infinite;
-        }
-
-        @keyframes breatheAnimation {
-            0%, 100% {
-                transform: scale(1);
-                border-color: rgba(255, 255, 255, 0.4);
-            }
-            50% {
-                transform: scale(1.15);
-                border-color: rgba(255, 255, 255, 0.8);
-            }
-        }
-
-        .floating-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 25s linear infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.1;
-            }
-            90% {
-                opacity: 0.1;
-            }
-            100% {
-                transform: translateY(-10px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .credits {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            opacity: 0.5;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
+        /* Animations */
         .fade-in {
-            animation: fadeInUp 0.8s ease forwards;
+            animation: fadeInUp 0.6s ease forwards;
         }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -447,78 +364,86 @@
             }
         }
 
-        @media (max-width: 480px) {
+        /* Responsive */
+        @media (max-width: 390px) {
             .container {
                 max-width: 100%;
             }
             
             .breathing-circle {
-                width: 200px;
-                height: 200px;
+                width: 180px;
+                height: 180px;
             }
             
             .inner-circle {
-                width: 160px;
-                height: 160px;
+                width: 140px;
+                height: 140px;
+            }
+            
+            .timer-display {
+                font-size: 42px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="floating-particles" id="particles"></div>
-    
     <div class="container">
         <!-- Mode Selection Screen -->
         <div class="screen active" id="modeScreen">
-            <div class="logo fade-in">Sereno</div>
+            <div class="fade-in">
+                <div class="logo">Sereno</div>
+                <div class="tagline">Mindful breathing made simple</div>
+            </div>
             
             <div class="mode-selection fade-in">
-                <div class="mode-title">Choose Your Practice</div>
-                
-                <div class="mode-card" onclick="selectMode('focus')">
-                    <span class="mode-emoji">🎯</span>
-                    <div class="mode-name">Focus & Concentration</div>
-                    <div class="mode-desc">Enhance mental clarity and sustained attention</div>
-                    <div class="mode-duration">10 minutes • Forest sounds & focused breathing</div>
-                    <div class="breathing-pattern">5-5 breathing pattern</div>
+                <div class="mode-card" data-mode="focus">
+                    <div class="mode-header">
+                        <span class="mode-emoji">🎯</span>
+                        <div class="mode-name">Focus</div>
+                    </div>
+                    <div class="mode-desc">Enhance mental clarity and concentration</div>
+                    <div class="mode-duration">10 minutes</div>
                 </div>
                 
-                <div class="mode-card" onclick="selectMode('stress')">
-                    <span class="mode-emoji">🌿</span>
-                    <div class="mode-name">Stress Reduction</div>
+                <div class="mode-card" data-mode="stress">
+                    <div class="mode-header">
+                        <span class="mode-emoji">🌿</span>
+                        <div class="mode-name">Stress Relief</div>
+                    </div>
                     <div class="mode-desc">Progressive relaxation and tension release</div>
-                    <div class="mode-duration">12 minutes • Rain sounds & body scan meditation</div>
-                    <div class="breathing-pattern">4-6 breathing pattern</div>
+                    <div class="mode-duration">12 minutes</div>
                 </div>
                 
-                <div class="mode-card" onclick="selectMode('sleep')">
-                    <span class="mode-emoji">🌙</span>
-                    <div class="mode-name">Sleep Preparation</div>
+                <div class="mode-card" data-mode="sleep">
+                    <div class="mode-header">
+                        <span class="mode-emoji">🌙</span>
+                        <div class="mode-name">Sleep</div>
+                    </div>
                     <div class="mode-desc">Deep relaxation for restorative sleep</div>
-                    <div class="mode-duration">15 minutes • Ocean waves & sleep induction</div>
-                    <div class="breathing-pattern">4-7-8 breathing pattern</div>
+                    <div class="mode-duration">15 minutes</div>
                 </div>
                 
-                <div class="mode-card" onclick="selectMode('anxiety')">
-                    <span class="mode-emoji">☁️</span>
-                    <div class="mode-name">Anxiety Relief</div>
-                    <div class="mode-desc">Calming techniques for emotional regulation</div>
-                    <div class="mode-duration">8 minutes • Rain sounds & grounding practice</div>
-                    <div class="breathing-pattern">4-6 breathing pattern</div>
+                <div class="mode-card" data-mode="anxiety">
+                    <div class="mode-header">
+                        <span class="mode-emoji">☁️</span>
+                        <div class="mode-name">Calm</div>
+                    </div>
+                    <div class="mode-desc">Soothing techniques for inner peace</div>
+                    <div class="mode-duration">8 minutes</div>
                 </div>
             </div>
         </div>
 
-        <!-- Meditation Session Screen -->
+        <!-- Session Screen -->
         <div class="screen" id="sessionScreen">
-            <button class="back-btn" onclick="goBack()">← Back</button>
-            <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
+            <div class="header">
+                <button class="back-btn" id="backBtn">←</button>
+                <button class="sound-toggle" id="soundToggle">🔊</button>
+            </div>
             
-            <div class="meditation-screen">
-                <div class="session-header">
-                    <div class="session-title" id="sessionTitle">Focus & Concentration</div>
-                    <div class="session-subtitle" id="sessionSubtitle">Professional guided meditation</div>
-                </div>
+            <div class="session-content">
+                <div class="session-title" id="sessionTitle">Focus</div>
+                <div class="session-subtitle" id="sessionSubtitle">Enhance mental clarity</div>
 
                 <div class="breathing-circle" id="breathingCircle">
                     <div class="inner-circle">
@@ -529,12 +454,12 @@
 
                 <div class="timer-display" id="timerDisplay">10:00</div>
                 
-                <div class="breathing-timer">
-                    <div class="breathing-phase" id="breathingPhase">Prepare to begin</div>
+                <div class="breathing-info">
+                    <div class="breathing-phase" id="breathingPhase">Ready to begin</div>
                     <div class="breathing-bar-container">
                         <div class="breathing-bar" id="breathingBar"></div>
                     </div>
-                    <div class="breathing-count" id="breathingCount">Ready when you are</div>
+                    <div class="breathing-count" id="breathingCount">Tap Start when ready</div>
                 </div>
 
                 <div class="instructor-message" id="instructorMessage">
@@ -542,539 +467,146 @@
                 </div>
 
                 <div class="controls">
-                    <button class="control-btn primary" id="playPauseBtn" onclick="toggleSession()">Start</button>
-                    <button class="control-btn" onclick="resetSession()">Reset</button>
+                    <button class="control-btn primary" id="playPauseBtn">Start</button>
+                    <button class="control-btn" id="resetBtn">Reset</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="credits">
-        Created by Andy Park
-    </div>
-
     <script>
-        let currentMode = null;
-        let sessionDuration = 0;
-        let currentTime = 0;
-        let isRunning = false;
-        let sessionInterval = null;
-        let instructorInterval = null;
-        let breathingInterval = null;
-        let breathingBarInterval = null;
-        let messageIndex = 0;
-        let currentBreathingPhase = 0;
-        let breathingStartTime = 0;
-        let soundEnabled = true;
-        let audioContext = null;
-        let backgroundGain = null;
-        let backgroundOscillator = null;
-        let naturalSoundNodes = [];
-        let currentNaturalSound = null;
+        // App state
+        const state = {
+            currentMode: null,
+            sessionDuration: 0,
+            currentTime: 0,
+            isRunning: false,
+            sessionInterval: null,
+            instructorInterval: null,
+            breathingInterval: null,
+            breathingBarInterval: null,
+            messageIndex: 0,
+            currentBreathingPhase: 0,
+            soundEnabled: true,
+            audioContext: null,
+            currentNaturalSound: null
+        };
 
-        // Sound generation functions
-        function playTone(frequency, duration, type = 'sine', volume = 0.1) {
-            if (!soundEnabled || !audioContext) return;
-            
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            oscillator.type = type;
-            
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
-        }
-
-        // Natural sound generation functions
-        function createWhiteNoise(audioContext, volume = 0.1) {
-            const bufferSize = 4096;
-            const whiteNoise = audioContext.createScriptProcessor(bufferSize, 1, 1);
-            
-            whiteNoise.onaudioprocess = function(e) {
-                const output = e.outputBuffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    output[i] = Math.random() * 2 - 1;
-                }
-            };
-            
-            const gain = audioContext.createGain();
-            gain.gain.setValueAtTime(volume, audioContext.currentTime);
-            
-            whiteNoise.connect(gain);
-            return { source: whiteNoise, gain: gain };
-        }
-
-        function createRainSound() {
-            if (!audioContext) return null;
-            
-            // Create filtered white noise for rain
-            const { source: whiteNoise, gain: noiseGain } = createWhiteNoise(audioContext, 0.08);
-            
-            // High-pass filter for rain texture
-            const highPass = audioContext.createBiquadFilter();
-            highPass.type = 'highpass';
-            highPass.frequency.setValueAtTime(1000, audioContext.currentTime);
-            highPass.Q.setValueAtTime(0.5, audioContext.currentTime);
-            
-            // Low-pass filter to soften
-            const lowPass = audioContext.createBiquadFilter();
-            lowPass.type = 'lowpass';
-            lowPass.frequency.setValueAtTime(8000, audioContext.currentTime);
-            lowPass.Q.setValueAtTime(1, audioContext.currentTime);
-            
-            // Connect the chain
-            noiseGain.connect(highPass);
-            highPass.connect(lowPass);
-            
-            // Add subtle modulation for natural variation
-            const lfo = audioContext.createOscillator();
-            const lfoGain = audioContext.createGain();
-            lfo.frequency.setValueAtTime(0.3, audioContext.currentTime);
-            lfo.type = 'sine';
-            lfoGain.gain.setValueAtTime(0.02, audioContext.currentTime);
-            
-            lfo.connect(lfoGain);
-            lfoGain.connect(noiseGain.gain);
-            
-            lfo.start();
-            
-            return { 
-                output: lowPass, 
-                sources: [whiteNoise, lfo],
-                type: 'rain'
-            };
-        }
-
-        function createForestSound() {
-            if (!audioContext) return null;
-            
-            const nodes = [];
-            
-            // Wind through leaves (filtered pink noise)
-            const { source: windNoise, gain: windGain } = createWhiteNoise(audioContext, 0.05);
-            windGain.gain.setValueAtTime(0.05, audioContext.currentTime);
-            
-            // Pink noise filter (approximate)
-            const pinkFilter = audioContext.createBiquadFilter();
-            pinkFilter.type = 'lowpass';
-            pinkFilter.frequency.setValueAtTime(2000, audioContext.currentTime);
-            pinkFilter.Q.setValueAtTime(0.7, audioContext.currentTime);
-            
-            windGain.connect(pinkFilter);
-            nodes.push(windNoise);
-            
-            // Occasional bird chirps using oscillators
-            function createBirdChirp() {
-                if (!soundEnabled || Math.random() > 0.3) return;
-                
-                const freq = 800 + Math.random() * 1200; // Random frequency for variety
-                const duration = 0.2 + Math.random() * 0.3;
-                
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                
-                osc.connect(gain);
-                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-                osc.type = 'sine';
-                
-                // Quick attack and decay for chirp
-                gain.gain.setValueAtTime(0, audioContext.currentTime);
-                gain.gain.linearRampToValueAtTime(0.02, audioContext.currentTime + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-                
-                osc.start(audioContext.currentTime);
-                osc.stop(audioContext.currentTime + duration);
-                
-                return { output: gain, sources: [osc] };
-            }
-            
-            // Create random bird chirps
-            const birdInterval = setInterval(() => {
-                if (currentNaturalSound?.type === 'forest' && soundEnabled) {
-                    const chirp = createBirdChirp();
-                    if (chirp) {
-                        chirp.output.connect(audioContext.destination);
-                    }
-                }
-            }, 3000 + Math.random() * 7000); // Every 3-10 seconds
-            
-            return {
-                output: pinkFilter,
-                sources: nodes,
-                interval: birdInterval,
-                type: 'forest'
-            };
-        }
-
-        function createOceanSound() {
-            if (!audioContext) return null;
-            
-            // Create wave-like sound using filtered noise and low frequency oscillation
-            const { source: baseNoise, gain: noiseGain } = createWhiteNoise(audioContext, 0.06);
-            
-            // Band-pass filter for ocean frequency range
-            const bandPass = audioContext.createBiquadFilter();
-            bandPass.type = 'bandpass';
-            bandPass.frequency.setValueAtTime(300, audioContext.currentTime);
-            bandPass.Q.setValueAtTime(0.8, audioContext.currentTime);
-            
-            // Low frequency oscillator for wave rhythm
-            const waveLfo = audioContext.createOscillator();
-            const waveLfoGain = audioContext.createGain();
-            waveLfo.frequency.setValueAtTime(0.1, audioContext.currentTime); // Very slow waves
-            waveLfo.type = 'sine';
-            waveLfoGain.gain.setValueAtTime(0.04, audioContext.currentTime);
-            
-            // Connect wave modulation
-            waveLfo.connect(waveLfoGain);
-            waveLfoGain.connect(noiseGain.gain);
-            
-            // Connect the audio chain
-            noiseGain.connect(bandPass);
-            waveLfo.start();
-            
-            return {
-                output: bandPass,
-                sources: [baseNoise, waveLfo],
-                type: 'ocean'
-            };
-        }
-
-        function startNaturalSound(soundType) {
-            stopNaturalSound(); // Stop any existing natural sound
-            
-            if (!soundEnabled || !audioContext) return;
-            
-            let soundNode = null;
-            
-            switch(soundType) {
-                case 'rain':
-                    soundNode = createRainSound();
-                    break;
-                case 'forest':
-                    soundNode = createForestSound();
-                    break;
-                case 'ocean':
-                    soundNode = createOceanSound();
-                    break;
-                default:
-                    return;
-            }
-            
-            if (soundNode) {
-                soundNode.output.connect(audioContext.destination);
-                currentNaturalSound = soundNode;
-                naturalSoundNodes.push(soundNode);
-            }
-        }
-
-        function stopNaturalSound() {
-            if (currentNaturalSound) {
-                // Stop all sources
-                if (currentNaturalSound.sources) {
-                    currentNaturalSound.sources.forEach(source => {
-                        if (source.stop) {
-                            source.stop();
-                        } else if (source.disconnect) {
-                            source.disconnect();
-                        }
-                    });
-                }
-                
-                // Clear any intervals
-                if (currentNaturalSound.interval) {
-                    clearInterval(currentNaturalSound.interval);
-                }
-                
-                // Disconnect output
-                if (currentNaturalSound.output && currentNaturalSound.output.disconnect) {
-                    currentNaturalSound.output.disconnect();
-                }
-                
-                currentNaturalSound = null;
-            }
-            
-            // Clean up any remaining nodes
-            naturalSoundNodes.forEach(node => {
-                if (node.sources) {
-                    node.sources.forEach(source => {
-                        if (source.stop) {
-                            try { source.stop(); } catch(e) {}
-                        }
-                        if (source.disconnect) {
-                            try { source.disconnect(); } catch(e) {}
-                        }
-                    });
-                }
-            });
-            naturalSoundNodes = [];
-        }
-
-        function playBreathingCue(isInhale) {
-            if (isInhale) {
-                playTone(523.25, 0.3, 'sine', 0.08); // C5 - gentle inhale cue
-            } else {
-                playTone(392.00, 0.4, 'sine', 0.06); // G4 - gentle exhale cue
-            }
-        }
-
-        function playStartSound() {
-            // Gentle ascending chime
-            setTimeout(() => playTone(523.25, 0.2, 'sine', 0.1), 0);
-            setTimeout(() => playTone(659.25, 0.2, 'sine', 0.1), 150);
-            setTimeout(() => playTone(783.99, 0.3, 'sine', 0.1), 300);
-        }
-
-        function playCompleteSound() {
-            // Completion bell sequence
-            setTimeout(() => playTone(523.25, 0.4, 'sine', 0.12), 0);
-            setTimeout(() => playTone(659.25, 0.4, 'sine', 0.12), 200);
-            setTimeout(() => playTone(783.99, 0.4, 'sine', 0.12), 400);
-            setTimeout(() => playTone(1046.50, 0.6, 'sine', 0.15), 600);
-        }
-
-        function startBackgroundAmbient() {
-            if (!soundEnabled || !audioContext || backgroundOscillator) return;
-            
-            // Create subtle ambient background based on mode
-            const frequencies = {
-                focus: [110, 165, 220], // Deep, focused tones
-                stress: [98, 147, 196], // Relaxing, lower frequencies
-                sleep: [73, 110, 146], // Very low, sleepy tones
-                anxiety: [130, 195, 260] // Gentle, reassuring frequencies
-            };
-            
-            const modeFreqs = frequencies[currentMode] || frequencies.focus;
-            
-            backgroundOscillator = [];
-            backgroundGain = audioContext.createGain();
-            backgroundGain.connect(audioContext.destination);
-            backgroundGain.gain.setValueAtTime(0.02, audioContext.currentTime); // Very quiet
-            
-            modeFreqs.forEach((freq, index) => {
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                
-                osc.connect(gain);
-                gain.connect(backgroundGain);
-                
-                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-                osc.type = 'sine';
-                
-                // Subtle random variation
-                const lfo = audioContext.createOscillator();
-                const lfoGain = audioContext.createGain();
-                lfo.connect(lfoGain);
-                lfoGain.connect(osc.frequency);
-                lfo.frequency.setValueAtTime(0.1 + index * 0.05, audioContext.currentTime);
-                lfoGain.gain.setValueAtTime(2, audioContext.currentTime);
-                
-                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                
-                osc.start();
-                lfo.start();
-                backgroundOscillator.push({osc, lfo});
-            });
-        }
-
-        function stopBackgroundAmbient() {
-            if (backgroundOscillator && backgroundOscillator.length > 0) {
-                backgroundOscillator.forEach(({osc, lfo}) => {
-                    osc.stop();
-                    lfo.stop();
-                });
-                backgroundOscillator = null;
-            }
-        }
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const soundButton = document.getElementById('soundToggle');
-            
-            if (soundEnabled) {
-                soundButton.textContent = '🔊';
-                soundButton.classList.remove('muted');
-                if (isRunning) {
-                    initAudio();
-                    const naturalSound = modes[currentMode]?.naturalSound;
-                    if (naturalSound) {
-                        startNaturalSound(naturalSound);
-                    }
-                    startBackgroundAmbient();
-                }
-            } else {
-                soundButton.textContent = '🔇';
-                soundButton.classList.add('muted');
-                stopBackgroundAmbient();
-                stopNaturalSound();
-            }
-        }
-
+        // Mode configurations
         const modes = {
             focus: {
-                title: 'Focus & Concentration',
-                subtitle: 'Enhance mental clarity and sustained attention',
-                duration: 600, // 10 minutes
+                title: 'Focus',
+                subtitle: 'Enhance mental clarity',
+                duration: 600,
                 icon: '🎯',
-                naturalSound: 'forest',
-                breathingPattern: [5000, 5000], // 5s in, 5s out
+                breathingPattern: [5000, 5000],
                 phases: ['Breathe In', 'Breathe Out'],
                 messages: [
-                    "Close your eyes and sit comfortably.",
-                    "Focus on your breathing.",
-                    "Breathe naturally through your nose.",
-                    "Notice air entering your nostrils.",
-                    "Feel air leaving your nostrils.",
-                    "When thoughts arise, return to breath.",
-                    "Count breaths if it helps focus.",
-                    "Keep your spine straight.",
-                    "Relax your shoulders.",
-                    "Soften your facial muscles.",
-                    "Notice the pause between breaths.",
-                    "Maintain steady attention on breathing.",
-                    "Simply observe each inhale and exhale.",
-                    "Don't judge wandering thoughts.",
-                    "Gently redirect attention to breath.",
-                    "Feel the rhythm of your breathing.",
-                    "Notice breath getting slower naturally.",
-                    "Keep returning to present moment.",
-                    "Focus on the sensation of breathing.",
-                    "Maintain this breathing awareness."
+                    "Close your eyes and sit comfortably",
+                    "Focus on your natural breathing",
+                    "Breathe through your nose",
+                    "Notice the air entering your nostrils",
+                    "Feel the air leaving your body",
+                    "When thoughts arise, return to breath",
+                    "Keep your spine straight and relaxed",
+                    "Stay focused on this moment"
                 ]
             },
             stress: {
-                title: 'Stress Reduction',
-                subtitle: 'Progressive relaxation and tension release',
-                duration: 720, // 12 minutes
+                title: 'Stress Relief',
+                subtitle: 'Progressive relaxation',
+                duration: 720,
                 icon: '🌿',
-                naturalSound: 'rain',
-                breathingPattern: [4000, 6000], // 4s in, 6s out
+                breathingPattern: [4000, 6000],
                 phases: ['Breathe In', 'Breathe Out'],
                 messages: [
-                    "Find a comfortable seated position.",
-                    "Scan your body for tension.",
-                    "Start with the top of your head.",
-                    "Relax your forehead and eyebrows.",
-                    "Soften your jaw and tongue.",
-                    "Drop your shoulders down.",
-                    "Release tension in your neck.",
-                    "Let your arms hang loosely.",
-                    "Breathe into your chest area.",
-                    "Relax your back muscles.",
-                    "Soften your abdomen.",
-                    "Release your hip muscles.",
-                    "Relax your thighs completely.",
-                    "Let your knees be loose.",
-                    "Relax your calves and shins.",
-                    "Soften your feet and toes.",
-                    "Notice your whole body relaxing.",
-                    "Continue breathing slowly and deeply.",
-                    "Let each exhale release more tension.",
-                    "Rest in this relaxed state."
+                    "Find a comfortable position",
+                    "Let your shoulders drop",
+                    "Take slow, deep breaths",
+                    "Feel tension leaving your body",
+                    "Notice your body relaxing",
+                    "Focus only on breathing",
+                    "Rest in this calm moment"
                 ]
             },
             sleep: {
-                title: 'Sleep Preparation',
-                subtitle: 'Deep relaxation for restorative sleep',
-                duration: 900, // 15 minutes
+                title: 'Sleep',
+                subtitle: 'Prepare for rest',
+                duration: 900,
                 icon: '🌙',
-                naturalSound: 'ocean',
-                breathingPattern: [4000, 7000, 8000], // 4s in, 7s hold, 8s out
+                breathingPattern: [4000, 7000, 8000],
                 phases: ['Breathe In', 'Hold', 'Breathe Out'],
                 messages: [
-                    "Lie down in your most comfortable position.",
-                    "Close your eyes and prepare for sleep.",
-                    "Begin the 4-7-8 breathing pattern.",
-                    "Inhale for 4 seconds through your nose.",
-                    "Hold your breath for 7 seconds.",
-                    "Exhale for 8 seconds through your mouth.",
-                    "Continue this breathing pattern.",
-                    "Feel your body becoming heavier.",
-                    "Let your muscles completely relax.",
-                    "Release any thoughts about tomorrow.",
-                    "Focus only on your breathing.",
-                    "Notice your heartbeat slowing down.",
-                    "Allow drowsiness to wash over you.",
-                    "Keep breathing slowly and deeply.",
-                    "Feel your mind becoming quieter.",
-                    "Let your body sink into the bed.",
-                    "Continue the gentle breathing rhythm.",
-                    "Allow sleep to come naturally.",
-                    "Rest your mind completely.",
-                    "Drift peacefully into sleep."
+                    "Lie down comfortably",
+                    "Close your eyes gently",
+                    "Feel your body getting heavy",
+                    "Let your muscles relax completely",
+                    "Allow your mind to quiet",
+                    "Let sleep come naturally"
                 ]
             },
             anxiety: {
-                title: 'Anxiety Relief',
-                subtitle: 'Calming techniques for emotional regulation',
-                duration: 480, // 8 minutes
+                title: 'Calm',
+                subtitle: 'Find inner peace',
+                duration: 480,
                 icon: '☁️',
-                naturalSound: 'rain',
-                breathingPattern: [4000, 6000], // 4s in, 6s out
+                breathingPattern: [4000, 6000],
                 phases: ['Breathe In', 'Breathe Out'],
                 messages: [
-                    "Sit comfortably with both feet on the ground.",
-                    "Feel your connection to the floor or chair.",
-                    "Take slow, controlled breaths.",
-                    "Make your exhale longer than your inhale.",
-                    "Breathe in for 4 seconds.",
-                    "Breathe out for 6 seconds.",
-                    "Place one hand on your chest.",
-                    "Feel your steady heartbeat.",
-                    "Focus on the present moment only.",
-                    "Notice that you are safe right now.",
-                    "Continue the 4-6 breathing pattern.",
-                    "Let anxious thoughts pass by.",
-                    "Return attention to your breathing.",
-                    "Feel your nervous system calming.",
-                    "Keep your breathing steady and slow.",
-                    "Ground yourself in this moment.",
-                    "Use your breath as an anchor.",
-                    "Maintain this calming rhythm."
+                    "You are safe in this moment",
+                    "Feel your feet on the ground",
+                    "Take slow, controlled breaths",
+                    "Focus on the present only",
+                    "Feel your body calming",
+                    "This moment is peaceful"
                 ]
             }
         };
 
-        // Create floating particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 25; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 25 + 's';
-                particle.style.animationDuration = (20 + Math.random() * 10) + 's';
-                particlesContainer.appendChild(particle);
+        // Audio functions
+        function initAudio() {
+            if (!state.audioContext) {
+                state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
+        function playTone(frequency, duration) {
+            if (!state.soundEnabled || !state.audioContext) return;
+            
+            const oscillator = state.audioContext.createOscillator();
+            const gainNode = state.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(state.audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, state.audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0, state.audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.05, state.audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, state.audioContext.currentTime + duration);
+            
+            oscillator.start(state.audioContext.currentTime);
+            oscillator.stop(state.audioContext.currentTime + duration);
+        }
+
+        // UI functions
         function selectMode(mode) {
-            currentMode = mode;
+            state.currentMode = mode;
             const modeData = modes[mode];
             
             document.getElementById('sessionTitle').textContent = modeData.title;
             document.getElementById('sessionSubtitle').textContent = modeData.subtitle;
             document.getElementById('breatheIcon').textContent = modeData.icon;
             
-            sessionDuration = modeData.duration;
-            currentTime = sessionDuration;
+            state.sessionDuration = modeData.duration;
+            state.currentTime = state.sessionDuration;
             updateTimerDisplay();
             
-            messageIndex = 0;
+            state.messageIndex = 0;
             showInstructorMessage(modeData.messages[0]);
-            
-            // Reset breathing timer
             resetBreathingTimer();
             
-            // Switch screens
             document.getElementById('modeScreen').classList.remove('active');
             document.getElementById('sessionScreen').classList.add('active');
         }
@@ -1086,7 +618,7 @@
         }
 
         function toggleSession() {
-            if (!isRunning) {
+            if (!state.isRunning) {
                 startSession();
             } else {
                 pauseSession();
@@ -1094,90 +626,47 @@
         }
 
         function startSession() {
-            if (!currentMode) return;
+            if (!state.currentMode) return;
             
-            initAudio(); // Initialize audio context
-            
-            isRunning = true;
+            initAudio();
+            state.isRunning = true;
             document.getElementById('playPauseBtn').textContent = 'Pause';
             
             // Play start sound
-            playStartSound();
+            playTone(523.25, 0.2);
             
-            // Set breathing animation based on mode
-            const circle = document.getElementById('breathingCircle');
-            if (currentMode === 'sleep') {
-                circle.classList.add('breathe-slow');
-            } else if (currentMode === 'focus') {
-                circle.classList.add('breathe-medium');
-            } else {
-                circle.classList.add('breathe-fast');
-            }
-            
-            // Start natural sound and ambient background
-            setTimeout(() => {
-                const naturalSound = modes[currentMode].naturalSound;
-                if (naturalSound) {
-                    startNaturalSound(naturalSound);
-                }
-                startBackgroundAmbient();
-            }, 1000);
-            
-            // Start breathing cues and timer
             startBreathingCues();
             
-            // Start main timer
-            sessionInterval = setInterval(() => {
-                if (currentTime > 0) {
-                    currentTime--;
+            state.sessionInterval = setInterval(() => {
+                if (state.currentTime > 0) {
+                    state.currentTime--;
                     updateTimerDisplay();
-                    
-                    if (currentTime === 0) {
+                    if (state.currentTime === 0) {
                         completeSession();
                     }
                 }
             }, 1000);
             
-            // Start instructor messages
             startInstructorMessages();
         }
 
         function pauseSession() {
-            isRunning = false;
+            state.isRunning = false;
             document.getElementById('playPauseBtn').textContent = 'Resume';
             
             const circle = document.getElementById('breathingCircle');
-            circle.classList.remove('breathe-slow', 'breathe-medium', 'breathe-fast');
+            circle.classList.remove('breathing-in', 'breathing-out', 'breathing-hold');
             
-            // Stop ambient sounds and natural sounds
-            stopBackgroundAmbient();
-            stopNaturalSound();
-            
-            if (sessionInterval) {
-                clearInterval(sessionInterval);
-                sessionInterval = null;
-            }
-            if (instructorInterval) {
-                clearInterval(instructorInterval);
-                instructorInterval = null;
-            }
-            if (breathingInterval) {
-                clearTimeout(breathingInterval);
-                breathingInterval = null;
-            }
-            if (breathingBarInterval) {
-                clearInterval(breathingBarInterval);
-                breathingBarInterval = null;
-            }
+            clearAllIntervals();
         }
 
         function resetSession() {
             pauseSession();
-            if (currentMode) {
-                currentTime = modes[currentMode].duration;
+            if (state.currentMode) {
+                state.currentTime = modes[state.currentMode].duration;
                 updateTimerDisplay();
-                messageIndex = 0;
-                showInstructorMessage(modes[currentMode].messages[0]);
+                state.messageIndex = 0;
+                showInstructorMessage(modes[state.currentMode].messages[0]);
                 document.getElementById('breatheText').textContent = 'Ready';
                 resetBreathingTimer();
             }
@@ -1187,98 +676,130 @@
         function completeSession() {
             pauseSession();
             document.getElementById('breatheText').textContent = 'Complete';
-            showInstructorMessage("Session completed. Take a moment to notice how you feel.");
+            showInstructorMessage("Session completed. Notice how you feel.");
             document.getElementById('playPauseBtn').textContent = 'Complete';
-            resetBreathingTimer();
-            document.getElementById('breathingPhase').textContent = 'Session Complete';
+            document.getElementById('breathingPhase').textContent = 'Well done';
             
             // Play completion sound
-            playCompleteSound();
+            playTone(523.25, 0.3);
+            setTimeout(() => playTone(659.25, 0.3), 200);
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const soundButton = document.getElementById('soundToggle');
+            
+            if (state.soundEnabled) {
+                soundButton.textContent = '🔊';
+                soundButton.classList.remove('muted');
+            } else {
+                soundButton.textContent = '🔇';
+                soundButton.classList.add('muted');
+            }
+        }
+
+        function clearAllIntervals() {
+            if (state.sessionInterval) {
+                clearInterval(state.sessionInterval);
+                state.sessionInterval = null;
+            }
+            if (state.instructorInterval) {
+                clearInterval(state.instructorInterval);
+                state.instructorInterval = null;
+            }
+            if (state.breathingInterval) {
+                clearTimeout(state.breathingInterval);
+                state.breathingInterval = null;
+            }
+            if (state.breathingBarInterval) {
+                clearInterval(state.breathingBarInterval);
+                state.breathingBarInterval = null;
+            }
         }
 
         function resetBreathingTimer() {
             const bar = document.getElementById('breathingBar');
             bar.style.width = '0%';
-            document.getElementById('breathingPhase').textContent = 'Prepare to begin';
-            document.getElementById('breathingCount').textContent = 'Ready when you are';
-            currentBreathingPhase = 0;
+            document.getElementById('breathingPhase').textContent = 'Ready to begin';
+            document.getElementById('breathingCount').textContent = 'Tap Start when ready';
+            state.currentBreathingPhase = 0;
         }
 
         function startBreathingCues() {
             const breatheText = document.getElementById('breatheText');
-            const pattern = modes[currentMode].breathingPattern;
-            const phases = modes[currentMode].phases;
+            const circle = document.getElementById('breathingCircle');
+            const pattern = modes[state.currentMode].breathingPattern;
+            const phases = modes[state.currentMode].phases;
             
-            currentBreathingPhase = 0;
+            state.currentBreathingPhase = 0;
             
             function nextPhase() {
-                if (isRunning) {
-                    const currentPhaseDuration = pattern[currentBreathingPhase];
-                    const phaseName = phases[currentBreathingPhase];
+                if (state.isRunning) {
+                    const currentPhaseDuration = pattern[state.currentBreathingPhase];
+                    const phaseName = phases[state.currentBreathingPhase];
                     
                     breatheText.textContent = phaseName;
                     document.getElementById('breathingPhase').textContent = phaseName;
                     document.getElementById('breathingCount').textContent = `${currentPhaseDuration / 1000} seconds`;
                     
-                    // Play breathing cue sound
+                    circle.classList.remove('breathing-in', 'breathing-out', 'breathing-hold');
+                    
                     if (phaseName.includes('In')) {
-                        playBreathingCue(true);
+                        circle.classList.add('breathing-in');
+                        playTone(523.25, 0.1);
                     } else if (phaseName.includes('Out')) {
-                        playBreathingCue(false);
+                        circle.classList.add('breathing-out');
+                        playTone(392.00, 0.15);
+                    } else if (phaseName.includes('Hold')) {
+                        circle.classList.add('breathing-hold');
                     }
                     
-                    // Start the visual breathing timer bar
                     startBreathingBar(currentPhaseDuration);
                     
-                    breathingInterval = setTimeout(() => {
-                        currentBreathingPhase = (currentBreathingPhase + 1) % phases.length;
+                    state.breathingInterval = setTimeout(() => {
+                        state.currentBreathingPhase = (state.currentBreathingPhase + 1) % phases.length;
                         nextPhase();
                     }, currentPhaseDuration);
                 }
             }
             
-            // Start immediately
             nextPhase();
         }
 
         function startBreathingBar(duration) {
             const bar = document.getElementById('breathingBar');
             const startTime = Date.now();
-            breathingStartTime = startTime;
             
-            // Clear any existing interval
-            if (breathingBarInterval) {
-                clearInterval(breathingBarInterval);
+            if (state.breathingBarInterval) {
+                clearInterval(state.breathingBarInterval);
             }
             
-            // Reset bar
             bar.style.width = '0%';
             
-            breathingBarInterval = setInterval(() => {
-                if (!isRunning) {
-                    clearInterval(breathingBarInterval);
+            state.breathingBarInterval = setInterval(() => {
+                if (!state.isRunning) {
+                    clearInterval(state.breathingBarInterval);
                     return;
                 }
                 
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min((elapsed / duration) * 100, 100);
-                
                 bar.style.width = progress + '%';
                 
                 if (progress >= 100) {
-                    clearInterval(breathingBarInterval);
+                    clearInterval(state.breathingBarInterval);
                 }
-            }, 16); // ~60fps updates
+            }, 16);
         }
 
         function startInstructorMessages() {
-            const messages = modes[currentMode].messages;
-            const messageInterval = 20; // Show message every 20 seconds
+            const messages = modes[state.currentMode].messages;
+            const messageInterval = 30;
             
-            instructorInterval = setInterval(() => {
-                if (isRunning) {
-                    messageIndex = (messageIndex + 1) % messages.length;
-                    showInstructorMessage(messages[messageIndex]);
+            state.instructorInterval = setInterval(() => {
+                if (state.isRunning) {
+                    state.messageIndex = (state.messageIndex + 1) % messages.length;
+                    showInstructorMessage(messages[state.messageIndex]);
                 }
             }, messageInterval * 1000);
         }
@@ -1294,21 +815,33 @@
         }
 
         function updateTimerDisplay() {
-            const minutes = Math.floor(currentTime / 60);
-            const seconds = currentTime % 60;
+            const minutes = Math.floor(state.currentTime / 60);
+            const seconds = state.currentTime % 60;
             document.getElementById('timerDisplay').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Initialize
-        createParticles();
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mode selection
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const mode = this.dataset.mode;
+                    selectMode(mode);
+                });
+            });
 
-        // Audio functions
-        function initAudio() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
+            // Navigation buttons
+            document.getElementById('backBtn').addEventListener('click', goBack);
+            document.getElementById('soundToggle').addEventListener('click', toggleSound);
+            document.getElementById('playPauseBtn').addEventListener('click', toggleSession);
+            document.getElementById('resetBtn').addEventListener('click', resetSession);
+
+            // Initialize first message
+            setTimeout(() => {
+                showInstructorMessage("Find a comfortable position and prepare to begin your practice.");
+            }, 500);
+        });
     </script>
 </body>
 </html>
