@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sereno - Meditation & Stress Relief</title>
+    <title>Sereno - Meditation App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -43,11 +46,30 @@
         }
 
         .logo {
-            font-size: 36px;
-            font-weight: 200;
-            letter-spacing: 3px;
+            font-family: 'EB Garamond', 'Times New Roman', Georgia, serif;
+            font-size: 42px;
+            font-weight: 400;
+            font-style: italic;
+            letter-spacing: 4px;
             margin-bottom: 60px;
             text-align: center;
+            text-shadow: 0 2px 20px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(45deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 50%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
         }
 
         .mode-selection {
@@ -194,7 +216,6 @@
             opacity: 0.95;
         }
 
-        /* New breathing timer styles */
         .breathing-timer {
             width: 100%;
             max-width: 300px;
@@ -317,8 +338,27 @@
             backdrop-filter: blur(10px);
         }
 
-        .back-btn:hover {
+        .sound-toggle {
+            position: absolute;
+            top: 40px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .sound-toggle:hover {
             background: rgba(255, 255, 255, 0.25);
+        }
+
+        .sound-toggle.muted {
+            opacity: 0.5;
         }
 
         .breathe-slow {
@@ -439,7 +479,7 @@
                     <span class="mode-emoji">🎯</span>
                     <div class="mode-name">Focus & Concentration</div>
                     <div class="mode-desc">Enhance mental clarity and sustained attention</div>
-                    <div class="mode-duration">10 minutes • Focused breathing</div>
+                    <div class="mode-duration">10 minutes • Forest sounds & focused breathing</div>
                     <div class="breathing-pattern">5-5 breathing pattern</div>
                 </div>
                 
@@ -447,7 +487,7 @@
                     <span class="mode-emoji">🌿</span>
                     <div class="mode-name">Stress Reduction</div>
                     <div class="mode-desc">Progressive relaxation and tension release</div>
-                    <div class="mode-duration">12 minutes • Body scan meditation</div>
+                    <div class="mode-duration">12 minutes • Rain sounds & body scan meditation</div>
                     <div class="breathing-pattern">4-6 breathing pattern</div>
                 </div>
                 
@@ -455,7 +495,7 @@
                     <span class="mode-emoji">🌙</span>
                     <div class="mode-name">Sleep Preparation</div>
                     <div class="mode-desc">Deep relaxation for restorative sleep</div>
-                    <div class="mode-duration">15 minutes • Sleep induction</div>
+                    <div class="mode-duration">15 minutes • Ocean waves & sleep induction</div>
                     <div class="breathing-pattern">4-7-8 breathing pattern</div>
                 </div>
                 
@@ -463,7 +503,7 @@
                     <span class="mode-emoji">☁️</span>
                     <div class="mode-name">Anxiety Relief</div>
                     <div class="mode-desc">Calming techniques for emotional regulation</div>
-                    <div class="mode-duration">8 minutes • Grounding practice</div>
+                    <div class="mode-duration">8 minutes • Rain sounds & grounding practice</div>
                     <div class="breathing-pattern">4-6 breathing pattern</div>
                 </div>
             </div>
@@ -472,6 +512,7 @@
         <!-- Meditation Session Screen -->
         <div class="screen" id="sessionScreen">
             <button class="back-btn" onclick="goBack()">← Back</button>
+            <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</button>
             
             <div class="meditation-screen">
                 <div class="session-header">
@@ -524,6 +565,358 @@
         let messageIndex = 0;
         let currentBreathingPhase = 0;
         let breathingStartTime = 0;
+        let soundEnabled = true;
+        let audioContext = null;
+        let backgroundGain = null;
+        let backgroundOscillator = null;
+        let naturalSoundNodes = [];
+        let currentNaturalSound = null;
+
+        // Sound generation functions
+        function playTone(frequency, duration, type = 'sine', volume = 0.1) {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // Natural sound generation functions
+        function createWhiteNoise(audioContext, volume = 0.1) {
+            const bufferSize = 4096;
+            const whiteNoise = audioContext.createScriptProcessor(bufferSize, 1, 1);
+            
+            whiteNoise.onaudioprocess = function(e) {
+                const output = e.outputBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+            };
+            
+            const gain = audioContext.createGain();
+            gain.gain.setValueAtTime(volume, audioContext.currentTime);
+            
+            whiteNoise.connect(gain);
+            return { source: whiteNoise, gain: gain };
+        }
+
+        function createRainSound() {
+            if (!audioContext) return null;
+            
+            // Create filtered white noise for rain
+            const { source: whiteNoise, gain: noiseGain } = createWhiteNoise(audioContext, 0.08);
+            
+            // High-pass filter for rain texture
+            const highPass = audioContext.createBiquadFilter();
+            highPass.type = 'highpass';
+            highPass.frequency.setValueAtTime(1000, audioContext.currentTime);
+            highPass.Q.setValueAtTime(0.5, audioContext.currentTime);
+            
+            // Low-pass filter to soften
+            const lowPass = audioContext.createBiquadFilter();
+            lowPass.type = 'lowpass';
+            lowPass.frequency.setValueAtTime(8000, audioContext.currentTime);
+            lowPass.Q.setValueAtTime(1, audioContext.currentTime);
+            
+            // Connect the chain
+            noiseGain.connect(highPass);
+            highPass.connect(lowPass);
+            
+            // Add subtle modulation for natural variation
+            const lfo = audioContext.createOscillator();
+            const lfoGain = audioContext.createGain();
+            lfo.frequency.setValueAtTime(0.3, audioContext.currentTime);
+            lfo.type = 'sine';
+            lfoGain.gain.setValueAtTime(0.02, audioContext.currentTime);
+            
+            lfo.connect(lfoGain);
+            lfoGain.connect(noiseGain.gain);
+            
+            lfo.start();
+            
+            return { 
+                output: lowPass, 
+                sources: [whiteNoise, lfo],
+                type: 'rain'
+            };
+        }
+
+        function createForestSound() {
+            if (!audioContext) return null;
+            
+            const nodes = [];
+            
+            // Wind through leaves (filtered pink noise)
+            const { source: windNoise, gain: windGain } = createWhiteNoise(audioContext, 0.05);
+            windGain.gain.setValueAtTime(0.05, audioContext.currentTime);
+            
+            // Pink noise filter (approximate)
+            const pinkFilter = audioContext.createBiquadFilter();
+            pinkFilter.type = 'lowpass';
+            pinkFilter.frequency.setValueAtTime(2000, audioContext.currentTime);
+            pinkFilter.Q.setValueAtTime(0.7, audioContext.currentTime);
+            
+            windGain.connect(pinkFilter);
+            nodes.push(windNoise);
+            
+            // Occasional bird chirps using oscillators
+            function createBirdChirp() {
+                if (!soundEnabled || Math.random() > 0.3) return;
+                
+                const freq = 800 + Math.random() * 1200; // Random frequency for variety
+                const duration = 0.2 + Math.random() * 0.3;
+                
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                osc.type = 'sine';
+                
+                // Quick attack and decay for chirp
+                gain.gain.setValueAtTime(0, audioContext.currentTime);
+                gain.gain.linearRampToValueAtTime(0.02, audioContext.currentTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + duration);
+                
+                return { output: gain, sources: [osc] };
+            }
+            
+            // Create random bird chirps
+            const birdInterval = setInterval(() => {
+                if (currentNaturalSound?.type === 'forest' && soundEnabled) {
+                    const chirp = createBirdChirp();
+                    if (chirp) {
+                        chirp.output.connect(audioContext.destination);
+                    }
+                }
+            }, 3000 + Math.random() * 7000); // Every 3-10 seconds
+            
+            return {
+                output: pinkFilter,
+                sources: nodes,
+                interval: birdInterval,
+                type: 'forest'
+            };
+        }
+
+        function createOceanSound() {
+            if (!audioContext) return null;
+            
+            // Create wave-like sound using filtered noise and low frequency oscillation
+            const { source: baseNoise, gain: noiseGain } = createWhiteNoise(audioContext, 0.06);
+            
+            // Band-pass filter for ocean frequency range
+            const bandPass = audioContext.createBiquadFilter();
+            bandPass.type = 'bandpass';
+            bandPass.frequency.setValueAtTime(300, audioContext.currentTime);
+            bandPass.Q.setValueAtTime(0.8, audioContext.currentTime);
+            
+            // Low frequency oscillator for wave rhythm
+            const waveLfo = audioContext.createOscillator();
+            const waveLfoGain = audioContext.createGain();
+            waveLfo.frequency.setValueAtTime(0.1, audioContext.currentTime); // Very slow waves
+            waveLfo.type = 'sine';
+            waveLfoGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+            
+            // Connect wave modulation
+            waveLfo.connect(waveLfoGain);
+            waveLfoGain.connect(noiseGain.gain);
+            
+            // Connect the audio chain
+            noiseGain.connect(bandPass);
+            waveLfo.start();
+            
+            return {
+                output: bandPass,
+                sources: [baseNoise, waveLfo],
+                type: 'ocean'
+            };
+        }
+
+        function startNaturalSound(soundType) {
+            stopNaturalSound(); // Stop any existing natural sound
+            
+            if (!soundEnabled || !audioContext) return;
+            
+            let soundNode = null;
+            
+            switch(soundType) {
+                case 'rain':
+                    soundNode = createRainSound();
+                    break;
+                case 'forest':
+                    soundNode = createForestSound();
+                    break;
+                case 'ocean':
+                    soundNode = createOceanSound();
+                    break;
+                default:
+                    return;
+            }
+            
+            if (soundNode) {
+                soundNode.output.connect(audioContext.destination);
+                currentNaturalSound = soundNode;
+                naturalSoundNodes.push(soundNode);
+            }
+        }
+
+        function stopNaturalSound() {
+            if (currentNaturalSound) {
+                // Stop all sources
+                if (currentNaturalSound.sources) {
+                    currentNaturalSound.sources.forEach(source => {
+                        if (source.stop) {
+                            source.stop();
+                        } else if (source.disconnect) {
+                            source.disconnect();
+                        }
+                    });
+                }
+                
+                // Clear any intervals
+                if (currentNaturalSound.interval) {
+                    clearInterval(currentNaturalSound.interval);
+                }
+                
+                // Disconnect output
+                if (currentNaturalSound.output && currentNaturalSound.output.disconnect) {
+                    currentNaturalSound.output.disconnect();
+                }
+                
+                currentNaturalSound = null;
+            }
+            
+            // Clean up any remaining nodes
+            naturalSoundNodes.forEach(node => {
+                if (node.sources) {
+                    node.sources.forEach(source => {
+                        if (source.stop) {
+                            try { source.stop(); } catch(e) {}
+                        }
+                        if (source.disconnect) {
+                            try { source.disconnect(); } catch(e) {}
+                        }
+                    });
+                }
+            });
+            naturalSoundNodes = [];
+        }
+
+        function playBreathingCue(isInhale) {
+            if (isInhale) {
+                playTone(523.25, 0.3, 'sine', 0.08); // C5 - gentle inhale cue
+            } else {
+                playTone(392.00, 0.4, 'sine', 0.06); // G4 - gentle exhale cue
+            }
+        }
+
+        function playStartSound() {
+            // Gentle ascending chime
+            setTimeout(() => playTone(523.25, 0.2, 'sine', 0.1), 0);
+            setTimeout(() => playTone(659.25, 0.2, 'sine', 0.1), 150);
+            setTimeout(() => playTone(783.99, 0.3, 'sine', 0.1), 300);
+        }
+
+        function playCompleteSound() {
+            // Completion bell sequence
+            setTimeout(() => playTone(523.25, 0.4, 'sine', 0.12), 0);
+            setTimeout(() => playTone(659.25, 0.4, 'sine', 0.12), 200);
+            setTimeout(() => playTone(783.99, 0.4, 'sine', 0.12), 400);
+            setTimeout(() => playTone(1046.50, 0.6, 'sine', 0.15), 600);
+        }
+
+        function startBackgroundAmbient() {
+            if (!soundEnabled || !audioContext || backgroundOscillator) return;
+            
+            // Create subtle ambient background based on mode
+            const frequencies = {
+                focus: [110, 165, 220], // Deep, focused tones
+                stress: [98, 147, 196], // Relaxing, lower frequencies
+                sleep: [73, 110, 146], // Very low, sleepy tones
+                anxiety: [130, 195, 260] // Gentle, reassuring frequencies
+            };
+            
+            const modeFreqs = frequencies[currentMode] || frequencies.focus;
+            
+            backgroundOscillator = [];
+            backgroundGain = audioContext.createGain();
+            backgroundGain.connect(audioContext.destination);
+            backgroundGain.gain.setValueAtTime(0.02, audioContext.currentTime); // Very quiet
+            
+            modeFreqs.forEach((freq, index) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(backgroundGain);
+                
+                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                osc.type = 'sine';
+                
+                // Subtle random variation
+                const lfo = audioContext.createOscillator();
+                const lfoGain = audioContext.createGain();
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                lfo.frequency.setValueAtTime(0.1 + index * 0.05, audioContext.currentTime);
+                lfoGain.gain.setValueAtTime(2, audioContext.currentTime);
+                
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                
+                osc.start();
+                lfo.start();
+                backgroundOscillator.push({osc, lfo});
+            });
+        }
+
+        function stopBackgroundAmbient() {
+            if (backgroundOscillator && backgroundOscillator.length > 0) {
+                backgroundOscillator.forEach(({osc, lfo}) => {
+                    osc.stop();
+                    lfo.stop();
+                });
+                backgroundOscillator = null;
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundButton = document.getElementById('soundToggle');
+            
+            if (soundEnabled) {
+                soundButton.textContent = '🔊';
+                soundButton.classList.remove('muted');
+                if (isRunning) {
+                    initAudio();
+                    const naturalSound = modes[currentMode]?.naturalSound;
+                    if (naturalSound) {
+                        startNaturalSound(naturalSound);
+                    }
+                    startBackgroundAmbient();
+                }
+            } else {
+                soundButton.textContent = '🔇';
+                soundButton.classList.add('muted');
+                stopBackgroundAmbient();
+                stopNaturalSound();
+            }
+        }
 
         const modes = {
             focus: {
@@ -531,6 +924,7 @@
                 subtitle: 'Enhance mental clarity and sustained attention',
                 duration: 600, // 10 minutes
                 icon: '🎯',
+                naturalSound: 'forest',
                 breathingPattern: [5000, 5000], // 5s in, 5s out
                 phases: ['Breathe In', 'Breathe Out'],
                 messages: [
@@ -561,6 +955,7 @@
                 subtitle: 'Progressive relaxation and tension release',
                 duration: 720, // 12 minutes
                 icon: '🌿',
+                naturalSound: 'rain',
                 breathingPattern: [4000, 6000], // 4s in, 6s out
                 phases: ['Breathe In', 'Breathe Out'],
                 messages: [
@@ -591,6 +986,7 @@
                 subtitle: 'Deep relaxation for restorative sleep',
                 duration: 900, // 15 minutes
                 icon: '🌙',
+                naturalSound: 'ocean',
                 breathingPattern: [4000, 7000, 8000], // 4s in, 7s hold, 8s out
                 phases: ['Breathe In', 'Hold', 'Breathe Out'],
                 messages: [
@@ -621,6 +1017,7 @@
                 subtitle: 'Calming techniques for emotional regulation',
                 duration: 480, // 8 minutes
                 icon: '☁️',
+                naturalSound: 'rain',
                 breathingPattern: [4000, 6000], // 4s in, 6s out
                 phases: ['Breathe In', 'Breathe Out'],
                 messages: [
@@ -699,8 +1096,13 @@
         function startSession() {
             if (!currentMode) return;
             
+            initAudio(); // Initialize audio context
+            
             isRunning = true;
             document.getElementById('playPauseBtn').textContent = 'Pause';
+            
+            // Play start sound
+            playStartSound();
             
             // Set breathing animation based on mode
             const circle = document.getElementById('breathingCircle');
@@ -711,6 +1113,15 @@
             } else {
                 circle.classList.add('breathe-fast');
             }
+            
+            // Start natural sound and ambient background
+            setTimeout(() => {
+                const naturalSound = modes[currentMode].naturalSound;
+                if (naturalSound) {
+                    startNaturalSound(naturalSound);
+                }
+                startBackgroundAmbient();
+            }, 1000);
             
             // Start breathing cues and timer
             startBreathingCues();
@@ -737,6 +1148,10 @@
             
             const circle = document.getElementById('breathingCircle');
             circle.classList.remove('breathe-slow', 'breathe-medium', 'breathe-fast');
+            
+            // Stop ambient sounds and natural sounds
+            stopBackgroundAmbient();
+            stopNaturalSound();
             
             if (sessionInterval) {
                 clearInterval(sessionInterval);
@@ -776,6 +1191,9 @@
             document.getElementById('playPauseBtn').textContent = 'Complete';
             resetBreathingTimer();
             document.getElementById('breathingPhase').textContent = 'Session Complete';
+            
+            // Play completion sound
+            playCompleteSound();
         }
 
         function resetBreathingTimer() {
@@ -801,6 +1219,13 @@
                     breatheText.textContent = phaseName;
                     document.getElementById('breathingPhase').textContent = phaseName;
                     document.getElementById('breathingCount').textContent = `${currentPhaseDuration / 1000} seconds`;
+                    
+                    // Play breathing cue sound
+                    if (phaseName.includes('In')) {
+                        playBreathingCue(true);
+                    } else if (phaseName.includes('Out')) {
+                        playBreathingCue(false);
+                    }
                     
                     // Start the visual breathing timer bar
                     startBreathingBar(currentPhaseDuration);
@@ -877,6 +1302,13 @@
 
         // Initialize
         createParticles();
+
+        // Audio functions
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
     </script>
 </body>
 </html>
