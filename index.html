@@ -23,8 +23,8 @@
 
         .container {
             max-width: 390px;
-            margin: 0 auto;
-            min-height: 100vh;
+            margin: 60px auto;
+            min-height: calc(100vh - 120px);
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -35,12 +35,12 @@
 
         .screen {
             display: none;
-            min-height: 100vh;
+            min-height: calc(100vh - 120px);
             flex-direction: column;
-            padding: 20px 24px 30px 24px;
+            padding: 30px 24px 40px 24px;
             position: relative;
-            padding-top: max(20px, env(safe-area-inset-top));
-            padding-bottom: max(30px, env(safe-area-inset-bottom));
+            padding-top: max(30px, env(safe-area-inset-top));
+            padding-bottom: max(40px, env(safe-area-inset-bottom));
         }
 
         .screen.active {
@@ -50,14 +50,15 @@
         /* Header */
         .header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: 30px;
             height: 44px;
             flex-shrink: 0;
+            position: relative;
         }
 
-        .back-btn, .sound-toggle {
+        .back-btn {
             width: 44px;
             height: 44px;
             background: rgba(255, 255, 255, 0.2);
@@ -74,17 +75,13 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
-        .back-btn:hover, .sound-toggle:hover {
+        .back-btn:hover, .back-btn:active {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.05);
         }
 
-        .back-btn:active, .sound-toggle:active {
+        .back-btn:active {
             transform: scale(0.95);
-        }
-
-        .sound-toggle.muted {
-            opacity: 0.6;
         }
 
         /* Logo */
@@ -307,6 +304,7 @@
 
         .controls {
             display: flex;
+            flex-direction: row;
             gap: 12px;
             margin-top: 20px;
             flex-shrink: 0;
@@ -317,10 +315,10 @@
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            padding: 14px 20px;
+            padding: 16px 24px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             transition: all 0.2s ease;
             backdrop-filter: blur(10px);
@@ -384,7 +382,13 @@
         @media (max-width: 390px) {
             .container {
                 max-width: 100%;
+                margin: 40px auto;
+                min-height: calc(100vh - 80px);
                 border-radius: 20px 20px 20px 20px;
+            }
+            
+            .screen {
+                min-height: calc(100vh - 80px);
             }
             
             .breathing-circle {
@@ -408,6 +412,16 @@
 
         /* Handle very short screens */
         @media (max-height: 700px) {
+            .container {
+                margin: 40px auto;
+                min-height: calc(100vh - 80px);
+            }
+            
+            .screen {
+                padding: 25px 24px 35px 24px;
+                min-height: calc(100vh - 80px);
+            }
+            
             .logo {
                 font-size: 28px;
             }
@@ -450,8 +464,14 @@
 
         /* Handle landscape orientation on phones */
         @media (max-height: 500px) {
+            .container {
+                margin: 20px auto;
+                min-height: calc(100vh - 40px);
+            }
+            
             .screen {
-                padding: 15px 24px 20px 24px;
+                padding: 20px 24px 25px 24px;
+                min-height: calc(100vh - 40px);
             }
             
             .header {
@@ -566,7 +586,6 @@
         <div class="screen" id="sessionScreen">
             <div class="header">
                 <button class="back-btn" id="backBtn">←</button>
-                <button class="sound-toggle" id="soundToggle">🔊</button>
             </div>
             
             <div class="session-content">
@@ -694,28 +713,44 @@
         // Audio functions
         function initAudio() {
             if (!state.audioContext) {
-                state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                try {
+                    state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                    return false;
+                }
             }
+            
+            // Resume context for mobile browsers
+            if (state.audioContext && state.audioContext.state === 'suspended') {
+                state.audioContext.resume();
+            }
+            
+            return true;
         }
 
         function playTone(frequency, duration) {
-            if (!state.soundEnabled || !state.audioContext) return;
+            if (!state.soundEnabled || !initAudio()) return;
             
-            const oscillator = state.audioContext.createOscillator();
-            const gainNode = state.audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(state.audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(frequency, state.audioContext.currentTime);
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0, state.audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.05, state.audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, state.audioContext.currentTime + duration);
-            
-            oscillator.start(state.audioContext.currentTime);
-            oscillator.stop(state.audioContext.currentTime + duration);
+            try {
+                const oscillator = state.audioContext.createOscillator();
+                const gainNode = state.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(state.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, state.audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, state.audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.05, state.audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, state.audioContext.currentTime + duration);
+                
+                oscillator.start(state.audioContext.currentTime);
+                oscillator.stop(state.audioContext.currentTime + duration);
+            } catch (e) {
+                console.log('Audio playback failed:', e);
+            }
         }
 
         // UI functions
@@ -756,12 +791,13 @@
         function startSession() {
             if (!state.currentMode) return;
             
-            initAudio();
             state.isRunning = true;
             document.getElementById('playPauseBtn').textContent = 'Pause';
             
-            // Play start sound
-            playTone(523.25, 0.2);
+            // Initialize audio and play start sound
+            if (initAudio()) {
+                playTone(523.25, 0.2);
+            }
             
             startBreathingCues();
             
@@ -815,15 +851,7 @@
 
         function toggleSound() {
             state.soundEnabled = !state.soundEnabled;
-            const soundButton = document.getElementById('soundToggle');
-            
-            if (state.soundEnabled) {
-                soundButton.textContent = '🔊';
-                soundButton.classList.remove('muted');
-            } else {
-                soundButton.textContent = '🔇';
-                soundButton.classList.add('muted');
-            }
+            // Sound toggle removed from UI but function kept for potential future use
         }
 
         function clearAllIntervals() {
@@ -961,7 +989,6 @@
 
             // Navigation buttons
             document.getElementById('backBtn').addEventListener('click', goBack);
-            document.getElementById('soundToggle').addEventListener('click', toggleSound);
             document.getElementById('playPauseBtn').addEventListener('click', toggleSession);
             document.getElementById('resetBtn').addEventListener('click', resetSession);
 
@@ -971,6 +998,19 @@
                     toggleSession();
                 }
             });
+
+            // Handle mobile audio context unlock
+            document.addEventListener('touchstart', function() {
+                if (state.audioContext && state.audioContext.state === 'suspended') {
+                    state.audioContext.resume();
+                }
+            }, { once: true });
+
+            document.addEventListener('click', function() {
+                if (state.audioContext && state.audioContext.state === 'suspended') {
+                    state.audioContext.resume();
+                }
+            }, { once: true });
 
             // Initialize first message
             setTimeout(() => {
